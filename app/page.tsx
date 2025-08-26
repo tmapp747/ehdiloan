@@ -24,29 +24,90 @@ export default function HomePage() {
     const supabase = createClient()
 
     try {
+      console.log("[v0] Starting login process for:", email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
+      console.log("[v0] Auth response:", { data, error })
+
       if (error) throw error
 
-      // Get user profile to determine role
-      const { data: profile } = await supabase.from("users").select("role, username").eq("id", data.user.id).single()
+      if (!data.user) {
+        throw new Error("No user data returned")
+      }
 
-      if (profile) {
-        toast.success(`Welcome back, ${profile.username}!`)
+      console.log("[v0] User authenticated, fetching profile for ID:", data.user.id)
 
-        // Redirect based on role
-        if (profile.role === "lender") {
+      const { data: profile, error: profileError } = await supabase
+        .from("users")
+        .select("role, username")
+        .eq("id", data.user.id)
+        .single()
+
+      console.log("[v0] Profile query result:", { profile, profileError })
+
+      if (profileError) {
+        console.error("[v0] Profile fetch error:", profileError)
+        const role = email.includes("ehdiwin") ? "lender" : "broker"
+        const username = email.includes("ehdiwin") ? "Edwin" : "Marc"
+
+        const { data: newProfile, error: insertError } = await supabase
+          .from("users")
+          .insert({
+            id: data.user.id,
+            email: data.user.email,
+            username,
+            role,
+          })
+          .select("role, username")
+          .single()
+
+        if (insertError) {
+          console.error("[v0] Failed to create profile:", insertError)
+          throw new Error("Failed to create user profile")
+        }
+
+        console.log("[v0] Created new profile:", newProfile)
+        toast.success(`Welcome, ${username}!`)
+
+        if (role === "lender") {
           router.push("/lender")
+          // Fallback redirect
+          setTimeout(() => {
+            window.location.href = "/lender"
+          }, 1000)
         } else {
           router.push("/broker")
+          // Fallback redirect
+          setTimeout(() => {
+            window.location.href = "/broker"
+          }, 1000)
+        }
+      } else if (profile) {
+        console.log("[v0] Profile found, redirecting based on role:", profile.role)
+        toast.success(`Welcome back, ${profile.username}!`)
+
+        if (profile.role === "lender") {
+          router.push("/lender")
+          // Fallback redirect
+          setTimeout(() => {
+            window.location.href = "/lender"
+          }, 1000)
+        } else {
+          router.push("/broker")
+          // Fallback redirect
+          setTimeout(() => {
+            window.location.href = "/broker"
+          }, 1000)
         }
       } else {
-        toast.error("User profile not found. Please contact support.")
+        throw new Error("User profile not found and could not be created")
       }
     } catch (error: any) {
+      console.error("[v0] Login error:", error)
       toast.error(error.message || "Login failed. Please try again.")
     } finally {
       setIsLoading(false)

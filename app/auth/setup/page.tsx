@@ -18,7 +18,7 @@ export default function AuthSetupPage() {
     try {
       // Create Edwin (Lender)
       const { data: edwinAuth, error: edwinAuthError } = await supabase.auth.signUp({
-        email: "edwin@ehdiloan.com",
+        email: "ehdiwin@747ph.live",
         password: "Loan@2025",
         options: {
           data: {
@@ -33,7 +33,7 @@ export default function AuthSetupPage() {
 
       // Create Marc (Broker)
       const { data: marcAuth, error: marcAuthError } = await supabase.auth.signUp({
-        email: "marc@ehdiloan.com",
+        email: "bossmarc@747ph.live",
         password: "Loan@2025",
         options: {
           data: {
@@ -46,8 +46,8 @@ export default function AuthSetupPage() {
 
       if (marcAuthError) throw marcAuthError
 
-      toast.success("Initial users created successfully!")
-      toast.info("Edwin: edwin@ehdiloan.com | Marc: marc@ehdiloan.com | Password: Loan@2025")
+      toast.success("Production users created successfully!")
+      toast.info("Edwin: ehdiwin@747ph.live | Marc: bossmarc@747ph.live | Password: Loan@2025")
     } catch (error: any) {
       toast.error("Error creating users: " + error.message)
     } finally {
@@ -59,19 +59,19 @@ export default function AuthSetupPage() {
     <div className="min-h-screen flex items-center justify-center p-6">
       <Card className="max-w-md w-full">
         <CardHeader>
-          <CardTitle>Setup Initial Users</CardTitle>
-          <CardDescription>Create the initial user accounts for Edwin (Lender) and Marc (Broker)</CardDescription>
+          <CardTitle>Setup Production Users</CardTitle>
+          <CardDescription>Create the production user accounts for Edwin (Lender) and Marc (Broker)</CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={createInitialUsers} disabled={isLoading} className="w-full">
-            {isLoading ? "Creating Users..." : "Create Initial Users"}
+            {isLoading ? "Creating Users..." : "Create Production Users"}
           </Button>
           <div className="mt-4 text-sm text-muted-foreground">
             <p>
-              <strong>Edwin (Lender):</strong> edwin@ehdiloan.com
+              <strong>Edwin (Lender):</strong> ehdiwin@747ph.live
             </p>
             <p>
-              <strong>Marc (Broker):</strong> marc@ehdiloan.com
+              <strong>Marc (Broker):</strong> bossmarc@747ph.live
             </p>
             <p>
               <strong>Password:</strong> Loan@2025
