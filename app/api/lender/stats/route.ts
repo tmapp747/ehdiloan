@@ -1,14 +1,35 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
 
-// Mock data - replace with actual database queries
 export async function GET() {
   try {
-    // In a real app, these would be database queries
+    const supabase = await createClient()
+
+    // Get total requests count
+    const { count: totalRequests } = await supabase.from("loan_requests").select("*", { count: "exact", head: true })
+
+    // Get pending requests count
+    const { count: pendingRequests } = await supabase
+      .from("loan_requests")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending")
+
+    // Get approved loans count
+    const { count: approvedLoans } = await supabase
+      .from("loans")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active")
+
+    // Get total loan amount
+    const { data: loanAmounts } = await supabase.from("loans").select("principal_amount").eq("status", "active")
+
+    const totalLoanAmount = loanAmounts?.reduce((sum, loan) => sum + loan.principal_amount, 0) || 0
+
     const stats = {
-      totalRequests: 15,
-      pendingRequests: 3,
-      approvedLoans: 8,
-      totalLoanAmount: 2500000, // ₱2.5M
+      totalRequests: totalRequests || 0,
+      pendingRequests: pendingRequests || 0,
+      approvedLoans: approvedLoans || 0,
+      totalLoanAmount,
     }
 
     return NextResponse.json(stats)
